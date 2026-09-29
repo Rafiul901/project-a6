@@ -1,0 +1,83 @@
+// use prisma-8
+enum UserRole {
+  CUSTOMER
+  DELIVERY_AGENT
+  ADMIN
+}
+
+model User {
+  id              Int                        @id @default(autoincrement())
+  email           String                     @unique
+  password        String
+  name            String
+  phone           String?
+  role            UserRole                   @default(CUSTOMER)
+
+  parcels         Parcel[]                   @relation("SentParcels")
+  assignedParcels Parcel[]                   @relation("AssignedParcels")
+  deletedAt       TimestamptzString?
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+}
+
+enum ParcelStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model Parcel {
+  id              Int                        @id @default(autoincrement())
+  trackingNumber  String                     @unique
+  senderId        Int
+  deliveryAgentId Int?
+  receiverName    String
+  receiverPhone   String
+  pickupAddress   String
+  deliveryAddress String
+  weight          Float
+  deliveryFee     Float
+  deletedAt       TimestamptzString?
+  status          ParcelStatus               @default(PENDING)
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+  payment         Payment?
+  trackingHistory ParcelTracking[]
+
+  sender          User                       @relation("SentParcels", fields:[senderId], references:[id])
+  deliveryAgent   User?                      @relation("AssignedParcels", fields:[deliveryAgentId], references:[id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id              Int                        @id @default(autoincrement())
+  parcelId        Int                        @unique
+  amount          Float
+  currency        String                     @default("BDT")
+  status          PaymentStatus              @default(PENDING)
+  stripeSessionId String?                    @unique
+  createdAt       TimestamptzString          @default(now())
+  updatedAt       temporal.updatedAtString()
+
+  parcel          Parcel                     @relation(fields:[parcelId], references:[id])
+}
+
+model ParcelTracking {
+  id        Int               @id @default(autoincrement())
+  parcelId  Int
+  status    ParcelStatus
+  location  String?
+  note      String?
+  createdAt TimestamptzString @default(now())
+
+  parcel    Parcel            @relation(fields:[parcelId], references:[id])
+}
