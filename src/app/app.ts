@@ -6,7 +6,7 @@ import express, {
 } from "express";
 import cors from "cors";
 import helmet from "helmet";
-
+import authRoutes from "../modules/auth/auth.routes";
 import ApiError from "../errors/ApiError.js";
 import notFound from "../middleware/notFound.js";
 import globalErrorHandler from "../middleware/globalErrorHandler.js";
@@ -46,6 +46,8 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/test-error", (req: Request, res: Response, next: NextFunction) => {
   return next(new ApiError(400, "This is a test error"));
 });
+
+app.use("/api/v1/auth", authRoutes);
 
 
 app.use(notFound);

@@ -17,3 +17,5 @@ export const registerSchema = z.object({
     .string()
     .optional(),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
