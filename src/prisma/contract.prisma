@@ -1,4 +1,5 @@
 // use prisma-8
+
 enum UserRole {
   CUSTOMER
   DELIVERY_AGENT
@@ -15,6 +16,8 @@ model User {
 
   parcels         Parcel[]                   @relation("SentParcels")
   assignedParcels Parcel[]                   @relation("AssignedParcels")
+  auditLogs       AuditLog[]
+
   deletedAt       TimestamptzString?
   createdAt       TimestamptzString          @default(now())
   updatedAt       temporal.updatedAtString()
@@ -44,6 +47,7 @@ model Parcel {
   status          ParcelStatus               @default(PENDING)
   createdAt       TimestamptzString          @default(now())
   updatedAt       temporal.updatedAtString()
+
   payment         Payment?
   trackingHistory ParcelTracking[]
 
@@ -80,4 +84,16 @@ model ParcelTracking {
   createdAt TimestamptzString @default(now())
 
   parcel    Parcel            @relation(fields:[parcelId], references:[id])
+}
+
+model AuditLog {
+  id        Int               @id @default(autoincrement())
+  userId    Int?
+  action    String
+  entity    String
+  entityId  Int?
+  details   String?
+  createdAt TimestamptzString @default(now())
+
+  user      User?             @relation(fields:[userId], references:[id])
 }
