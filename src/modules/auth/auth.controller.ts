@@ -14,6 +14,17 @@ const register = async (req: Request, res: Response) => {
   });
 };
 
+const login = async (req: Request, res: Response) => {
+  const result = await authService.login(req.body);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Login successful",
+    data: result,
+  });
+};
+
 export const authController = {
-  register,
+  register,login
 };
