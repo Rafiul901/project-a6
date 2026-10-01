@@ -4,8 +4,11 @@ import { Router } from "express";
 import auth from "../../middleware/auth.js";
 import role from "../../middleware/role.js";
 import validateRequest from "../../middleware/validateRequest.js";
+import {
+  createParcelSchema,
+  getMyParcelsSchema,
+} from "./parcel.validation.js";
 
-import { createParcelSchema } from "./parcel.validation.js";
 import { parcelController } from "./parcel.controller.js";
 
 const router = Router();
@@ -18,11 +21,29 @@ router.post(
   parcelController.createParcel,
 );
 
+
+
 router.get(
   "/my",
   auth,
   role("CUSTOMER"),
+  validateRequest(getMyParcelsSchema, "query"),
   parcelController.getMyParcels,
 );
+
+router.get(
+  "/:id",
+  auth,
+  role("CUSTOMER"),
+  parcelController.getParcelById,
+);
+
+router.patch(
+  "/:id/cancel",
+  auth,
+  role("CUSTOMER"),
+  parcelController.cancelParcel,
+);
+
 
 export default router;

@@ -1,12 +1,10 @@
 import type { Request, Response } from "express";
+import type { GetMyParcelsQuery } from "./parcel.validation.js";
 
 import sendResponse from "../../utils/sendResponse.js";
 import { parcelService } from "./parcel.service.js";
 
-const createParcel = async (
-  req: Request,
-  res: Response,
-) => {
+const createParcel = async (req: Request, res: Response) => {
   const result = await parcelService.createParcel(
     req.user!.userId,
     req.body,
@@ -20,12 +18,13 @@ const createParcel = async (
   });
 };
 
-const getMyParcels = async (
-  req: Request,
-  res: Response,
-) => {
+const getMyParcels = async (req: Request, res: Response) => {
+
+  const query = (req as any).validatedQuery as GetMyParcelsQuery;
+
   const result = await parcelService.getMyParcels(
     req.user!.userId,
+    query,
   );
 
   return sendResponse(res, {
@@ -36,6 +35,39 @@ const getMyParcels = async (
   });
 };
 
+const getParcelById = async (req: Request, res: Response) => {
+  const parcelId = Number(req.params.id);
+
+  const result = await parcelService.getParcelById(
+    parcelId,
+    req.user!.userId,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Parcel retrieved successfully",
+    data: result,
+  });
+};
+
+const cancelParcel = async (req: Request, res: Response) => {
+  const parcelId = Number(req.params.id);
+
+  const result = await parcelService.cancelParcel(
+    parcelId,
+    req.user!.userId,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Parcel cancelled successfully",
+    data: result,
+  });
+};
+
 export const parcelController = {
-  createParcel,getMyParcels
+  createParcel,
+  getMyParcels,getParcelById,cancelParcel
 };

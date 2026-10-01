@@ -1,7 +1,10 @@
 import db from "../../prisma/db.js";
 import ApiError from "../../errors/ApiError.js";
 
-import type { CreateParcelInput } from "./parcel.validation.js";
+import type {
+  CreateParcelInput,
+  GetMyParcelsQuery,
+} from "./parcel.validation.js";
 
 const generateTrackingNumber = () => {
   const timestamp = Date.now();
@@ -31,20 +34,132 @@ const createParcel = async (
   return parcel;
 };
 
+const getMyParcels = async (
+  senderId: number,
+  query: GetMyParcelsQuery,
+): Promise<{
+  parcels: any[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}> => {
+  const { page, limit, status } = query;
+
+  const skip = (page - 1) * limit;
+
+  const where = {
+    senderId,
+    deletedAt: null,
+    ...(status ? { status } : {}),
+  };
+
+  const [parcels, rawTotal] = await Promise.all([
+    db.orm.public.Parcel
+      .where(where)
+      .orderBy((p) => p.createdAt.desc())
+      .offset(skip)
+      .limit(limit)
+      .all(),
+
+    db.orm.public.Parcel
+      .where(where)
+      .count(),
+  ]);
+
+  
+  const total = Number(rawTotal);
+
+  return {
+    parcels,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
 
 
-const getMyParcels = async (senderId: number) => {
-  const parcels = await db.orm.public.Parcel
+const getParcelById = async (
+  parcelId: number,
+  senderId: number,
+): Promise<{
+  id: number;
+  trackingNumber: string;
+  senderId: number;
+  deliveryAgentId: number | null;
+  receiverName: string;
+  receiverPhone: string;
+  pickupAddress: string;
+  deliveryAddress: string;
+  weight: number;
+  deliveryFee: number;
+  status: string;
+  createdAt: any;
+  updatedAt: any;
+}> => {
+  const parcel = await db.orm.public.Parcel
     .where({
+      id: parcelId,
       senderId,
       deletedAt: null,
     })
-    .orderBy((p) => p.createdAt.desc())
-    .all();
+    .first();
 
-  return parcels;
+  if (!parcel) {
+    throw new ApiError(404, "Parcel not found");
+  }
+
+  return parcel;
+};
+
+const cancelParcel = async (
+  parcelId: number,
+  senderId: number,
+): Promise<{
+  id: number;
+  trackingNumber: string;
+  senderId: number;
+  status: string;
+  deletedAt: any;
+  [key: string]: any;
+}> => {
+  const parcel = await db.orm.public.Parcel
+    .where({
+      id: parcelId,
+      senderId,
+      deletedAt: null,
+    })
+    .first();
+
+  if (!parcel) {
+    throw new ApiError(404, "Parcel not found");
+  }
+
+  if (parcel.status !== "PENDING") {
+    throw new ApiError(400, "Only pending parcels can be cancelled");
+  }
+
+  const cancelledParcel = await db.orm.public.Parcel
+    .where({ id: parcelId })
+    .update({
+      status: "CANCELLED",
+      deletedAt: new Date().toISOString(),
+    });
+
+  if (!cancelledParcel) {
+    throw new ApiError(500, "Failed to cancel parcel");
+  }
+
+  return cancelledParcel;
 };
 
 export const parcelService = {
-  createParcel,getMyParcels
+  createParcel,
+  getMyParcels,getParcelById,cancelParcel
 };
+

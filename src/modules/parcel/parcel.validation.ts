@@ -49,6 +49,13 @@ export const getMyParcelsSchema = z.object({
     .optional(),
 });
 
+export const cancelParcelSchema = z.object({
+  reason: z
+    .string()
+    .min(3, "Cancellation reason must be at least 3 characters")
+    .optional(),
+});
+
 export type GetMyParcelsQuery = z.infer<
   typeof getMyParcelsSchema
 >;
