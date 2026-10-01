@@ -287,10 +287,32 @@ const updateParcelStatus = async (
   return updatedParcel;
 };
 
+const getTrackingHistory = async (
+  parcelId: number,
+  senderId: number,
+): Promise<any[]> => {
+  const parcel = await db.orm.public.Parcel
+    .where({
+      id: parcelId,
+      senderId,
+      deletedAt: null,
+    })
+    .first();
 
+  if (!parcel) {
+    throw new ApiError(404, "Parcel not found");
+  }
+
+  const history = await db.orm.public.ParcelTracking
+    .where({ parcelId })
+    .orderBy((t) => t.createdAt.asc())
+    .all();
+
+  return history;
+};
 
 export const parcelService = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory
 };
 

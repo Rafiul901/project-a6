@@ -69,5 +69,12 @@ router.patch(
   parcelController.updateParcelStatus,
 );
 
+router.get(
+  "/:id/tracking",
+  auth,
+  role("CUSTOMER"),
+  parcelController.getTrackingHistory,
+);
+
 
 export default router;
