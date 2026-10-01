@@ -56,6 +56,24 @@ export const cancelParcelSchema = z.object({
     .optional(),
 });
 
+export const getAvailableParcelsSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(100)
+    .default(10),
+});
+
+
+
+
+export type GetAvailableParcelsQuery = z.infer<
+  typeof getAvailableParcelsSchema
+>;
+
 export type GetMyParcelsQuery = z.infer<
   typeof getMyParcelsSchema
 >;

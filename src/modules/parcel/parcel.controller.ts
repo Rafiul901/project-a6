@@ -67,7 +67,20 @@ const cancelParcel = async (req: Request, res: Response) => {
   });
 };
 
+const getAvailableParcels = async (req: Request, res: Response) => {
+  const query = (req as any).validatedQuery ?? req.query;
+
+  const result = await parcelService.getAvailableParcels(query);
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Available parcels retrieved successfully",
+    data: result,
+  });
+};
+
 export const parcelController = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels
 };

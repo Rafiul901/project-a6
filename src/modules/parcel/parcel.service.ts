@@ -4,7 +4,9 @@ import ApiError from "../../errors/ApiError.js";
 import type {
   CreateParcelInput,
   GetMyParcelsQuery,
+  GetAvailableParcelsQuery,
 } from "./parcel.validation.js";
+
 
 const generateTrackingNumber = () => {
   const timestamp = Date.now();
@@ -158,8 +160,87 @@ const cancelParcel = async (
   return cancelledParcel;
 };
 
+const getAvailableParcels = async (
+  query: GetAvailableParcelsQuery,
+): Promise<{
+  parcels: any[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}> => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const where = {
+    status: "PENDING" as const,
+    deliveryAgentId: null,
+    deletedAt: null,
+  };
+
+  const parcels = await db.orm.public.Parcel
+    .where(where)
+    .orderBy((p) => p.createdAt.desc())
+    .offset(skip)
+    .limit(limit)
+    .all();
+
+  const rawTotal = await db.orm.public.Parcel
+    .where(where)
+    .count();
+
+  const total = Number(rawTotal);
+
+  return {
+    parcels,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+const assignParcel = async (
+  parcelId: number,
+  deliveryAgentId: number,
+): Promise<any> => {
+  const parcel = await db.orm.public.Parcel
+    .where({
+      id: parcelId,
+      deletedAt: null,
+    })
+    .first();
+
+  if (!parcel) {
+    throw new ApiError(404, "Parcel not found");
+  }
+
+  if (parcel.status !== "PENDING") {
+    throw new ApiError(400, "Only pending parcels can be assigned");
+  }
+
+  if (parcel.deliveryAgentId !== null) {
+    throw new ApiError(400, "Parcel is already assigned to a delivery agent");
+  }
+
+  const updatedParcel = await db.orm.public.Parcel
+    .where({ id: parcelId })
+    .update({
+      deliveryAgentId,
+    });
+
+  return updatedParcel;
+};
+
+
+
 export const parcelService = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel
 };
 
