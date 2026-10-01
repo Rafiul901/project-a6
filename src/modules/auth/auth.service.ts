@@ -3,7 +3,7 @@ import db from "../../prisma/db.js";
 import type { LoginInput, RegisterInput } from "./auth.validation.js";
 import { createToken } from "../../utils/jwt.js";
 import config from "../../config/index.js";
-
+import ApiError from "../../errors/ApiError.js";
 
 const register = async (payload: RegisterInput) => {
   const existingUser = await db.orm.public.User
@@ -11,7 +11,7 @@ const register = async (payload: RegisterInput) => {
     .first();
 
   if (existingUser) {
-    throw new Error("User with this email already exists");
+    throw new ApiError(409, "User with this email already exists");
   }
 
   const hashedPassword = await bcrypt.hash(payload.password, 12);
@@ -38,7 +38,7 @@ const login = async (payload: LoginInput) => {
   });
 
   if (!user) {
-    throw new Error("Invalid email or password");
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const isPasswordCorrect = await bcrypt.compare(
@@ -47,7 +47,7 @@ const login = async (payload: LoginInput) => {
   );
 
   if (!isPasswordCorrect) {
-    throw new Error("Invalid email or password");
+    throw new ApiError(401, "Invalid email or password");
   }
 
   const accessToken = createToken(
@@ -87,7 +87,7 @@ const getMe = async (userId: number) => {
   });
 
   if (!user) {
-    throw new Error("User not found");
+    throw new ApiError(404, "User not found");
   }
 
   return {
@@ -99,8 +99,8 @@ const getMe = async (userId: number) => {
   };
 };
 
-
 export const authService = {
   register,
-  login,getMe
+  login,
+  getMe,
 };
