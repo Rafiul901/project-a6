@@ -80,7 +80,40 @@ const getAvailableParcels = async (req: Request, res: Response) => {
   });
 };
 
+const assignParcel = async (req: Request, res: Response) => {
+  const parcelId = Number(req.params.id);
+
+  const result = await parcelService.assignParcel(
+    parcelId,
+    req.user!.userId,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Parcel assigned successfully",
+    data: result,
+  });
+};
+
+const updateParcelStatus = async (req: Request, res: Response) => {
+  const parcelId = Number(req.params.id);
+
+  const result = await parcelService.updateParcelStatus(
+    parcelId,
+    req.user!.userId,
+    req.body,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Parcel status updated successfully",
+    data: result,
+  });
+};
+
 export const parcelController = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus
 };

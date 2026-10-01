@@ -5,6 +5,7 @@ import type {
   CreateParcelInput,
   GetMyParcelsQuery,
   GetAvailableParcelsQuery,
+  UpdateParcelStatusInput,
 } from "./parcel.validation.js";
 
 
@@ -237,10 +238,59 @@ const assignParcel = async (
   return updatedParcel;
 };
 
+const updateParcelStatus = async (
+  parcelId: number,
+  deliveryAgentId: number,
+  payload: UpdateParcelStatusInput,
+): Promise<any> => {
+  const parcel = await db.orm.public.Parcel
+    .where({ id: parcelId, deletedAt: null })
+    .first();
+
+  if (!parcel) {
+    throw new ApiError(404, "Parcel not found");
+  }
+
+  if (parcel.deliveryAgentId !== deliveryAgentId) {
+    throw new ApiError(403, "You are not assigned to this parcel");
+  }
+
+  const allowedTransitions: Record<string, string> = {
+    PENDING: "PICKED_UP",
+    PICKED_UP: "IN_TRANSIT",
+    IN_TRANSIT: "OUT_FOR_DELIVERY",
+    OUT_FOR_DELIVERY: "DELIVERED",
+  };
+
+  const nextStatus = allowedTransitions[parcel.status];
+
+  if (nextStatus !== payload.status) {
+    throw new ApiError(
+      400,
+      `Invalid status transition from ${parcel.status} to ${payload.status}`,
+    );
+  }
+
+  const updatedParcel = await db.orm.public.Parcel
+    .where({ id: parcelId })
+    .update({
+      status: payload.status,
+    });
+
+  await db.orm.public.ParcelTracking.create({
+    parcelId,
+    status: payload.status,
+    location: payload.location,
+    note: payload.note,
+  });
+
+  return updatedParcel;
+};
+
 
 
 export const parcelService = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus
 };
 

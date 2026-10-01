@@ -67,7 +67,22 @@ export const getAvailableParcelsSchema = z.object({
     .default(10),
 });
 
+export const updateParcelStatusSchema = z.object({
+  status: z.enum([
+    "PICKED_UP",
+    "IN_TRANSIT",
+    "OUT_FOR_DELIVERY",
+    "DELIVERED",
+  ]),
 
+  location: z.string().optional(),
+
+  note: z.string().optional(),
+});
+
+export type UpdateParcelStatusInput = z.infer<
+  typeof updateParcelStatusSchema
+>;
 
 
 export type GetAvailableParcelsQuery = z.infer<
