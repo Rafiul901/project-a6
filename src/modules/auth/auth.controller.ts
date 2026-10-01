@@ -25,12 +25,16 @@ const login = async (req: Request, res: Response) => {
   });
 };
 
+
+
 const me = async (req: Request, res: Response) => {
+  const result = await authService.getMe(req.user!.userId);
+
   return sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "User information retrieved successfully",
-    data: req.user,
+    data: result,
   });
 };
 

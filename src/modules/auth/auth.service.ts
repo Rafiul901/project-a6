@@ -80,7 +80,27 @@ const login = async (payload: LoginInput) => {
     },
   };
 };
+
+const getMe = async (userId: number) => {
+  const user = await db.orm.public.User.first({
+    id: userId,
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    role: user.role,
+  };
+};
+
+
 export const authService = {
   register,
-  login
+  login,getMe
 };
