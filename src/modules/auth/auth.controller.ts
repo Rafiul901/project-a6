@@ -25,6 +25,15 @@ const login = async (req: Request, res: Response) => {
   });
 };
 
+const me = async (req: Request, res: Response) => {
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User information retrieved successfully",
+    data: req.user,
+  });
+};
+
 export const authController = {
-  register,login
+  register,login,me
 };
