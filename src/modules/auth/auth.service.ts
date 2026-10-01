@@ -1,6 +1,8 @@
 import bcrypt from "bcrypt";
 import db from "../../prisma/db.js";
 import type { LoginInput, RegisterInput } from "./auth.validation.js";
+import { createToken } from "../../utils/jwt.js";
+import config from "../../config/index.js";
 
 
 const register = async (payload: RegisterInput) => {
@@ -48,15 +50,36 @@ const login = async (payload: LoginInput) => {
     throw new Error("Invalid email or password");
   }
 
+  const accessToken = createToken(
+    {
+      userId: user.id,
+      role: user.role,
+    },
+    config.jwt.accessSecret,
+    "15m",
+  );
+
+  const refreshToken = createToken(
+    {
+      userId: user.id,
+      role: user.role,
+    },
+    config.jwt.refreshSecret,
+    "7d",
+  );
+
   return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    role: user.role,
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    },
   };
 };
-
 export const authService = {
   register,
   login
