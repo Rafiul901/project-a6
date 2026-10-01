@@ -10,6 +10,8 @@ import authRoutes from "../modules/auth/auth.routes";
 import ApiError from "../errors/ApiError.js";
 import notFound from "../middleware/notFound.js";
 import globalErrorHandler from "../middleware/globalErrorHandler.js";
+import parcelRoutes from "../modules/parcel/parcel.routes.js";
+
 
 import config from "../config/index.js";
 import sendResponse from "../utils/sendResponse.js";
@@ -48,7 +50,7 @@ app.get("/test-error", (req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
-
+app.use("/api/v1/parcels", parcelRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);

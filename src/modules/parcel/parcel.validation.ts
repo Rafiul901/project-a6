@@ -26,6 +26,33 @@ export const createParcelSchema = z.object({
     .positive("Delivery fee must be greater than 0"),
 });
 
+
+export const getMyParcelsSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(100)
+    .default(10),
+
+  status: z
+    .enum([
+      "PENDING",
+      "PICKED_UP",
+      "IN_TRANSIT",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+      "CANCELLED",
+    ])
+    .optional(),
+});
+
+export type GetMyParcelsQuery = z.infer<
+  typeof getMyParcelsSchema
+>;
+
 export type CreateParcelInput = z.infer<
   typeof createParcelSchema
 >;

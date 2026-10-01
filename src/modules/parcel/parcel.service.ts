@@ -31,6 +31,20 @@ const createParcel = async (
   return parcel;
 };
 
+
+
+const getMyParcels = async (senderId: number) => {
+  const parcels = await db.orm.public.Parcel
+    .where({
+      senderId,
+      deletedAt: null,
+    })
+    .orderBy((p) => p.createdAt.desc())
+    .all();
+
+  return parcels;
+};
+
 export const parcelService = {
-  createParcel,
+  createParcel,getMyParcels
 };
