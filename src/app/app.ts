@@ -6,7 +6,7 @@ import express, {
 } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import authRoutes from "../modules/auth/auth.routes";
+import authRoutes from "../modules/auth/auth.routes.js"; 
 import ApiError from "../errors/ApiError.js";
 import notFound from "../middleware/notFound.js";
 import globalErrorHandler from "../middleware/globalErrorHandler.js";
@@ -16,8 +16,8 @@ import adminRoutes from "../modules/admin/admin.routes.js";
 import config from "../config/index.js";
 import sendResponse from "../utils/sendResponse.js";
 import paymentWebhookRoutes from "../modules/payment/payment.webhook.routes.js";
-const app: Application = express();
 
+const app: Application = express();
 
 app.use(helmet());
 
@@ -36,7 +36,6 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 
 app.get("/health", (req: Request, res: Response) => {
   return sendResponse(res, {
