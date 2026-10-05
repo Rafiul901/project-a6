@@ -5,9 +5,7 @@
     "module": "preserve",
     "moduleResolution": "bundler",
     "target": "ES2023",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -19,6 +17,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-   "include": ["src/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
