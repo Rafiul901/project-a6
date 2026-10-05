@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "preserve",
+    "module": "ESNext",
     "moduleResolution": "bundler",
     "target": "ES2023",
     "types": ["node"],
