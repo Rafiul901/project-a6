@@ -1,8 +1,10 @@
 import app from "./app/app.js";
 import config from "./config/index.js";
 
-app.listen(config.port, () => {
-  console.log(
-    `Server is running on port ${config.port} in ${config.nodeEnv} mode`,
-  );
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(config.port, () => {
+    console.log(`Server running on port ${config.port}`);
+  });
+}
+
+export default app;
