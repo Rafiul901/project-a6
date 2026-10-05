@@ -56,7 +56,7 @@ const login = async (payload: LoginInput) => {
       role: user.role,
     },
     config.jwt.accessSecret,
-    "15m",
+    "1d",
   );
 
   const refreshToken = createToken(

@@ -16,7 +16,11 @@ const validateRequest = (
       });
     }
 
-    req[source] = result.data;
+    if (source === "body") {
+      req.body = result.data;
+    } else {
+      (req as any).validatedQuery = result.data;
+    }
 
     next();
   };

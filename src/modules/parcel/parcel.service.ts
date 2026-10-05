@@ -9,12 +9,9 @@ import type {
   GetAssignedParcelsQuery,
 } from "./parcel.validation.js";
 
-
 const generateTrackingNumber = () => {
   const timestamp = Date.now();
-
   const random = Math.floor(1000 + Math.random() * 9000);
-
   return `CR-${timestamp}-${random}`;
 };
 
@@ -58,7 +55,9 @@ const getMyParcels = async (
     totalPages: number;
   };
 }> => {
-  const { page, limit, status } = query;
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const status = query.status;
 
   const skip = (page - 1) * limit;
 
@@ -68,21 +67,20 @@ const getMyParcels = async (
     ...(status ? { status } : {}),
   };
 
-  const [parcels, rawTotal] = await Promise.all([
-    db.orm.public.Parcel
-      .where(where)
-      .orderBy((p) => p.createdAt.desc())
-      .offset(skip)
-      .limit(limit)
-      .all(),
+  const parcels = await db.orm.public.Parcel
+    .where(where)
+    .orderBy((p) => p.createdAt.desc())
+    .offset(skip)
+    .limit(limit)
+    .all();
 
-    db.orm.public.Parcel
-      .where(where)
-      .count(),
-  ]);
+  const aggResult = await db.orm.public.Parcel
+    .where(where)
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     parcels,
@@ -94,7 +92,6 @@ const getMyParcels = async (
     },
   };
 };
-
 
 const getParcelById = async (
   parcelId: number,
@@ -206,11 +203,13 @@ const getAvailableParcels = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.Parcel
+  const aggResult = await db.orm.public.Parcel
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     parcels,
@@ -370,11 +369,13 @@ const getAssignedParcels = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.Parcel
+  const aggResult = await db.orm.public.Parcel
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     parcels,
@@ -389,6 +390,12 @@ const getAssignedParcels = async (
 
 export const parcelService = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory,getAssignedParcels
+  getMyParcels,
+  getParcelById,
+  cancelParcel,
+  getAvailableParcels,
+  assignParcel,
+  updateParcelStatus,
+  getTrackingHistory,
+  getAssignedParcels,
 };
-

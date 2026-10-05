@@ -41,11 +41,13 @@ const getUsers = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.User
+  const aggResult = await db.orm.public.User
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   const safeUsers = users.map((user) => ({
     id: user.id,
@@ -95,11 +97,13 @@ const getAllParcels = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.Parcel
+  const aggResult = await db.orm.public.Parcel
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     parcels,
@@ -141,11 +145,13 @@ const getAuditLogs = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.AuditLog
+  const aggResult = await db.orm.public.AuditLog
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     logs,
@@ -159,5 +165,7 @@ const getAuditLogs = async (
 };
 
 export const adminService = {
-  getUsers,getAllParcels,getAuditLogs
+  getUsers,
+  getAllParcels,
+  getAuditLogs,
 };
