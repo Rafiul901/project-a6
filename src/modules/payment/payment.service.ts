@@ -124,7 +124,6 @@ const createCheckoutSession = async (
   };
 };
 
-
 const getPaymentById = async (
   paymentId: number,
   customerId: number,
@@ -197,11 +196,13 @@ const getMyPayments = async (
     .limit(limit)
     .all();
 
-  const rawTotal = await db.orm.public.Payment
+  const aggResult = await db.orm.public.Payment
     .where(where)
-    .count();
+    .aggregate((a) => ({
+      total: a.count(),
+    }));
 
-  const total = Number(rawTotal);
+  const total = Number(aggResult.total);
 
   return {
     payments,
@@ -215,5 +216,8 @@ const getMyPayments = async (
 };
 
 export const paymentService = {
-  createPayment,createCheckoutSession,getPaymentById,getMyPayments
+  createPayment,
+  createCheckoutSession,
+  getPaymentById,
+  getMyPayments,
 };
