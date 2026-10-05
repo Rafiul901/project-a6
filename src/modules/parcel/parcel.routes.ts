@@ -7,7 +7,9 @@ import validateRequest from "../../middleware/validateRequest.js";
 import {
   createParcelSchema,
   getMyParcelsSchema,
-  getAvailableParcelsSchema,updateParcelStatusSchema
+  getAvailableParcelsSchema,
+  updateParcelStatusSchema,
+  getAssignedParcelsSchema,
 } from "./parcel.validation.js";
 
 import { parcelController } from "./parcel.controller.js";
@@ -74,6 +76,14 @@ router.get(
   auth,
   role("CUSTOMER"),
   parcelController.getTrackingHistory,
+);
+
+router.get(
+  "/assigned",
+  auth,
+  role("DELIVERY_AGENT"),
+  validateRequest(getAssignedParcelsSchema, "query"),
+  parcelController.getAssignedParcels,
 );
 
 

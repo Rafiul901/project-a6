@@ -80,6 +80,32 @@ export const updateParcelStatusSchema = z.object({
   note: z.string().optional(),
 });
 
+export const getAssignedParcelsSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+
+  limit: z.coerce
+    .number()
+    .int()
+    .positive()
+    .max(100)
+    .default(10),
+
+  status: z
+    .enum([
+      "PENDING",
+      "PICKED_UP",
+      "IN_TRANSIT",
+      "OUT_FOR_DELIVERY",
+      "DELIVERED",
+      "CANCELLED",
+    ])
+    .optional(),
+});
+
+export type GetAssignedParcelsQuery = z.infer<
+  typeof getAssignedParcelsSchema
+>;
+
 export type UpdateParcelStatusInput = z.infer<
   typeof updateParcelStatusSchema
 >;

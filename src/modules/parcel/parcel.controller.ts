@@ -129,7 +129,23 @@ const getTrackingHistory = async (req: Request, res: Response) => {
   });
 };
 
+const getAssignedParcels = async (req: Request, res: Response) => {
+  const query = (req as any).validatedQuery ?? req.query;
+
+  const result = await parcelService.getAssignedParcels(
+    req.user!.userId,
+    query,
+  );
+
+  return sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Assigned parcels retrieved successfully",
+    data: result,
+  });
+};
+
 export const parcelController = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory,getAssignedParcels
 };

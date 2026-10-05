@@ -1,11 +1,12 @@
 import db from "../../prisma/db.js";
 import ApiError from "../../errors/ApiError.js";
-
+import createAuditLog from "../../utils/createAuditLog.js";
 import type {
   CreateParcelInput,
   GetMyParcelsQuery,
   GetAvailableParcelsQuery,
   UpdateParcelStatusInput,
+  GetAssignedParcelsQuery,
 } from "./parcel.validation.js";
 
 
@@ -32,6 +33,14 @@ const createParcel = async (
     deliveryAddress: payload.deliveryAddress,
     weight: payload.weight,
     deliveryFee: payload.deliveryFee,
+  });
+
+  await createAuditLog({
+    userId: senderId,
+    action: "CREATE",
+    entity: "Parcel",
+    entityId: parcel.id,
+    details: `Parcel ${parcel.trackingNumber} created`,
   });
 
   return parcel;
@@ -158,6 +167,14 @@ const cancelParcel = async (
     throw new ApiError(500, "Failed to cancel parcel");
   }
 
+  await createAuditLog({
+    userId: senderId,
+    action: "CANCEL",
+    entity: "Parcel",
+    entityId: parcel.id,
+    details: `Parcel ${parcel.trackingNumber} cancelled`,
+  });
+
   return cancelledParcel;
 };
 
@@ -231,9 +248,15 @@ const assignParcel = async (
 
   const updatedParcel = await db.orm.public.Parcel
     .where({ id: parcelId })
-    .update({
-      deliveryAgentId,
-    });
+    .update({ deliveryAgentId });
+
+  await createAuditLog({
+    userId: deliveryAgentId,
+    action: "ASSIGN",
+    entity: "Parcel",
+    entityId: parcel.id,
+    details: `Parcel ${parcel.trackingNumber} assigned to delivery agent ${deliveryAgentId}`,
+  });
 
   return updatedParcel;
 };
@@ -273,15 +296,21 @@ const updateParcelStatus = async (
 
   const updatedParcel = await db.orm.public.Parcel
     .where({ id: parcelId })
-    .update({
-      status: payload.status,
-    });
+    .update({ status: payload.status });
 
   await db.orm.public.ParcelTracking.create({
     parcelId,
     status: payload.status,
     location: payload.location,
     note: payload.note,
+  });
+
+  await createAuditLog({
+    userId: deliveryAgentId,
+    action: "UPDATE_STATUS",
+    entity: "Parcel",
+    entityId: parcel.id,
+    details: `Parcel ${parcel.trackingNumber} status changed from ${parcel.status} to ${payload.status}`,
   });
 
   return updatedParcel;
@@ -311,8 +340,55 @@ const getTrackingHistory = async (
   return history;
 };
 
+const getAssignedParcels = async (
+  deliveryAgentId: number,
+  query: GetAssignedParcelsQuery,
+): Promise<{
+  parcels: any[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}> => {
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+  const status = query.status;
+  const skip = (page - 1) * limit;
+
+  const where = {
+    deliveryAgentId,
+    deletedAt: null,
+    ...(status ? { status } : {}),
+  };
+
+  const parcels = await db.orm.public.Parcel
+    .where(where)
+    .orderBy((p) => p.createdAt.desc())
+    .offset(skip)
+    .limit(limit)
+    .all();
+
+  const rawTotal = await db.orm.public.Parcel
+    .where(where)
+    .count();
+
+  const total = Number(rawTotal);
+
+  return {
+    parcels,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
 export const parcelService = {
   createParcel,
-  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory
+  getMyParcels,getParcelById,cancelParcel,getAvailableParcels,assignParcel,updateParcelStatus,getTrackingHistory,getAssignedParcels
 };
 

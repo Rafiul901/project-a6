@@ -12,10 +12,10 @@ import notFound from "../middleware/notFound.js";
 import globalErrorHandler from "../middleware/globalErrorHandler.js";
 import parcelRoutes from "../modules/parcel/parcel.routes.js";
 import paymentRoutes from "../modules/payment/payment.routes.js";
-
+import adminRoutes from "../modules/admin/admin.routes.js";
 import config from "../config/index.js";
 import sendResponse from "../utils/sendResponse.js";
-
+import paymentWebhookRoutes from "../modules/payment/payment.webhook.routes.js";
 const app: Application = express();
 
 
@@ -26,6 +26,12 @@ app.use(
     origin: config.appUrl,
     credentials: true,
   }),
+);
+
+app.use(
+  "/api/v1/payments/webhook",
+  express.raw({ type: "application/json" }),
+  paymentWebhookRoutes,
 );
 
 app.use(express.json());
@@ -52,7 +58,7 @@ app.get("/test-error", (req: Request, res: Response, next: NextFunction) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/parcels", parcelRoutes);
 app.use("/api/v1/payments", paymentRoutes);
-
+app.use("/api/v1/admin", adminRoutes);
 
 app.use(notFound);
 app.use(globalErrorHandler);
