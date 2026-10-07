@@ -3,20 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
-"scripts": {
-  "dev": "tsx watch ./src/server.ts",
-  "build": "tsup",
-  "start": "node dist/server.js",
-  "postinstall": "prisma generate" 
-},
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch ./src/server.ts",
+    "build": "prisma contract emit && tsup",
+    "start": "node dist/server.js",
+    "postinstall": "exit 0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
-    "@prisma/adapter-pg": "^7.10.0",
-    "@prisma/client": "^7.10.0",
-    "@prisma/orm-postgres": "^8.0.0-rc.13",
+    "@prisma/adapter-pg": "^8.0.0-rc.17",
+    "@prisma/client": "^8.0.0-rc.17",
+    "@prisma/orm-postgres": "^8.0.0-rc.17",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
