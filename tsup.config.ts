@@ -2,14 +2,14 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/server.ts"],
-  format: ["esm"], // Keep this as ESM
+  format: ["esm"],
   target: "esnext",
-  outDir: "dist",
+  outDir: "api", // Changed from 'dist' to 'api'
   clean: true,
   bundle: true,
   splitting: false,
   sourcemap: true,
-  // Add this banner to shim require() for CJS dependencies
+  external: ['@prisma/client', 'prisma', '@prisma/adapter-pg', '@prisma/orm-postgres'], 
   banner: {
     js: `
       import { createRequire } from 'module';
