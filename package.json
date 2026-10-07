@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./src/server.ts",
-    "build": "prisma contract emit && tsup",
+    "build": "tsup",
     "start": "node api/server.js",
     "postinstall": "exit 0"
   },
