@@ -2,7 +2,7 @@
   "name": "assignment-6",
   "version": "1.0.0",
   "description": "",
-  "main": "api/server.js", 
+  "main": "api/server.js",
   "type": "module",
   "scripts": {
     "dev": "tsx watch ./src/server.ts",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
-    "@prisma/orm-postgres": "^8.0.0-rc.14",
+    "@prisma/orm-postgres": "8.0.0-rc.14",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -40,7 +40,7 @@
     "@vercel/node": "^20.0.0",
     "eslint": "^10.11.0",
     "prettier": "^3.9.9",
-    "prisma": "^8.0.0-rc.17",
+    "prisma": "8.0.0-rc.14",
     "tsup": "^8.5.1",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
