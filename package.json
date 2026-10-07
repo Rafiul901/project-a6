@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
-  "scripts": {
+"scripts": {
   "dev": "tsx watch ./src/server.ts",
   "build": "tsup",
   "start": "node dist/server.js",
-  "postinstall": "prisma contract emit || exit 0"
+  "postinstall": "prisma generate" 
 },
   "keywords": [],
   "author": "",
